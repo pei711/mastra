@@ -1,11 +1,27 @@
 import { describe, expectTypeOf, it } from 'vitest';
 import { z } from 'zod/v4';
 import { Agent } from '../agent';
+import { BatchPartsProcessor, ProcessorStepSchema, TokenLimiterProcessor } from '../processors';
+import type { ProcessorStepInput } from '../processors';
 import { createTool } from '../tools';
 import { createWorkflow } from './create';
 import { createStep } from './workflow';
 
 describe('Workflow schema type inference', () => {
+  it('should allow chaining processor steps with shared step schemas (#27577)', () => {
+    createWorkflow({
+      id: 'output-guardrails',
+      inputSchema: ProcessorStepSchema,
+      outputSchema: ProcessorStepSchema,
+    })
+      .then(createStep(new TokenLimiterProcessor({ limit: 1000 })))
+      .then(createStep(new BatchPartsProcessor()))
+      .map(async ({ inputData }) => {
+        expectTypeOf(inputData).toEqualTypeOf<ProcessorStepInput>();
+        return inputData;
+      });
+  });
+
   describe('schemas with .optional().default()', () => {
     it('should allow chaining a step whose inputSchema matches the workflow inputSchema with optional defaults', () => {
       const schema = z.object({
