@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createAnthropicThinkingMiddleware } from '../claude-max.js';
+import { createAnthropicThinkingMiddleware, opencodeClaudeMaxProvider } from '../claude-max.js';
 
 type Params = {
   temperature?: number;
@@ -97,3 +97,11 @@ describe('createAnthropicThinkingMiddleware', () => {
     });
   });
 });
+
+describe('opencodeClaudeMaxProvider', () => {
+  it('defaults to an active model (claude-sonnet-4-6)', () => {
+    const model = opencodeClaudeMaxProvider();
+    expect(model.modelId).toBe('claude-sonnet-4-6');
+  });
+});
+
